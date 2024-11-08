@@ -84,6 +84,7 @@ public class LibraryService {
         inputScanner.close();
     }
 
+    // CRUD and metod for inteactions with books 💕💕💕💕💕
     private static void bookMenu(Scanner inputScanner, NodoBook rootBooks) {
         int opcBook;
         do {
@@ -133,7 +134,6 @@ public class LibraryService {
             }
         } while (opcBook != 0);
     }
-
     private static void userMenu(Scanner inputScanner, NodoUser rootUser) {
         int opcUser;
         do {
@@ -182,7 +182,6 @@ public class LibraryService {
             }
         } while (opcUser != 0);
     }
-
     private static void borrowBook(Scanner inputScanner, NodoBook rootBooks, ArrayList<NodoBook> booksBorrowed) {
         System.out.print("Enter the book ID to borrow: ");
         String id = inputScanner.nextLine();
@@ -194,20 +193,20 @@ public class LibraryService {
             System.out.println("Book with ID " + id + " does not exist.");
         }
     }
-
     private static void returnBook(Scanner inputScanner, ArrayList<NodoBook> booksBorrowed) {
         System.out.print("Enter the book ID to return: ");
         String id = inputScanner.nextLine();
-        for (NodoBook book : booksBorrowed) {
+        Iterator<NodoBook> iterator = booksBorrowed.iterator();
+        while (iterator.hasNext()) {
+            NodoBook book = iterator.next();
             if (book.id.equals(id)) {
-                booksBorrowed.remove(book);
+                iterator.remove();
                 System.out.println("Book returned successfully!");
                 return;
             }
         }
         System.out.println("Book with ID " + id + " not found in borrowed list.");
     }
-
     private static void showBorrowedBooks(ArrayList<NodoBook> booksBorrowed) {
         if (booksBorrowed.isEmpty()) {
             System.out.println("No borrowed books.");
@@ -218,7 +217,6 @@ public class LibraryService {
             }
         }
     }
-    
     private static void showAllBooks(NodoBook node) {
         if (node != null) {
             showAllBooks(node.left); 
@@ -226,17 +224,16 @@ public class LibraryService {
             showAllBooks(node.right); 
         }
     }
-
-    private static boolean searchBook(NodoBook nodoBook, String id) {
-        if (nodoBook == null) {
-            return false;
+    private static NodoBook searchBook(NodoBook node, String id) {
+        if (node == null) {
+            return null;
         }
-        if (nodoBook.id.equals(id)) {
-            return true; 
+        if (node.id.equals(id)) {
+            return node;
         }
-        return searchBook(nodoBook.left, id) || searchBook(nodoBook.right, id);
+        NodoBook leftResult = searchBook(node.left, id);
+        return leftResult != null ? leftResult : searchBook(node.right, id);
     }
-
     private static NodoBook deleteBook(NodoBook root, String id) {
         if (root == null) {
             return null; 
@@ -263,7 +260,6 @@ public class LibraryService {
         }
         return root;
     }
-
     private static NodoBook insertBook(NodoBook root, NodoBook newBook) {
         if (root == null) {
             return newBook; 
@@ -275,10 +271,73 @@ public class LibraryService {
         }
         return root;
     }
-    private static NodoBook findSmallestNode(NodoBook root) {
+
+    // CRUD fro User 👌
+    private static NodoUser insertUser(NodoUser root, NodoUser newUser) {
+        if (root == null) {
+            return newUser;
+        }
+        if (newUser.cedula.compareTo(root.cedula) < 0) {
+            root.left = insertUser(root.left, newUser);
+        } else {
+            root.right = insertUser(root.right, newUser);
+        }
+        return root;
+    }
+
+    private static NodoUser deleteUser(NodoUser root, String cedula) {
+        if (root == null) {
+            return null;
+        }
+        if (cedula.compareTo(root.cedula) < 0) {
+            root.left = deleteUser(root.left, cedula);
+        } else if (cedula.compareTo(root.cedula) > 0) {
+            root.right = deleteUser(root.right, cedula);
+        } else {
+            if (root.left == null && root.right == null) {
+                return null;
+            }
+            if (root.left == null) {
+                return root.right;
+            }
+            if (root.right == null) {
+                return root.left;
+            }
+            NodoUser smallestNode = findSmallestNode(root.right);
+            root.cedula = smallestNode.cedula;
+            root.name = smallestNode.name;
+            root.lastNames = smallestNode.lastNames;
+            root.right = deleteUser(root.right, smallestNode.cedula);
+        }
+        return root;
+    }
+
+    private static boolean searchUser(NodoUser root, String cedula) {
+        if (root == null) {
+            return false;
+        }
+        if (root.cedula.equals(cedula)) {
+            return true;
+        }
+        return searchUser(root.left, cedula) || searchUser(root.right, cedula);
+    }
+
+    private static void showAllUsers(NodoUser node) {
+        if (node != null) {
+            showAllUsers(node.left); 
+            System.out.println("Cedula: " + node.cedula + ", Name: " + node.name + ", Last Names: " + node.lastNames);
+            showAllUsers(node.right); 
+        }
+    }
+
+    // method for help⛑️
+    private static NodoUser findSmallestNode(NodoUser root) {
         while (root.left != null) {
             root = root.left;
         }
-        return root;    
+        return root;
     }
+    
+    
+
 }
